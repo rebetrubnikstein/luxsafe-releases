@@ -1,0 +1,23 @@
+name: Publish APK release
+on:
+  push:
+    branches: [main]
+    paths: ['parts/**', '.github/workflows/publish.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble APK
+        run: |
+          cat parts/LuxSafeVPN.apk.part* > LuxSafeVPN.apk
+          echo "$(cat parts/LuxSafeVPN.apk.sha256)  LuxSafeVPN.apk" | sha256sum -c -
+          ls -la LuxSafeVPN.apk
+      - name: Upload to release v1.0
+        run: |
+          gh release upload v1.0 LuxSafeVPN.apk --clobber -R "${{ github.repository }}"
